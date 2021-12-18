@@ -8,11 +8,11 @@
 Prop Painter: Revisited is a re-write of the original Prop Painter mod with fixes and performance improvements.
 
 Improvements compared to the old Prop Painter includes:
-(1) Less memory footprint, as no dictionary or lists are used. One simple array is used to store all 65k props colors.
-(2) Loading and saving is faster, as no extra memory is created to save/load color data.
-(3) Faster color access compared to old Prop Painter, as all color access is done within a delegate with color array stored in the stack.
-(4) Only one method is patched compared to old Prop Painter patching 4 methods (of which 3 were patching MoveIt methods)
-(5) Does not create any unnecessary gameobjects, contrary to the old Prop Painter which creates one GameObject to run color data synchronization
+1. Less memory footprint, as no dictionary or lists are used. One simple array is used to store all 65k props colors.
+2. Loading and saving is faster, as no extra memory is created to save/load color data.
+3. Faster color access compared to old Prop Painter, as all color access is done within a delegate with color array stored in the stack.
+4. Only one method is patched compared to old Prop Painter patching 4 methods (of which 3 were patching MoveIt methods)
+5. Does not create any unnecessary gameobjects, contrary to the old Prop Painter which creates one GameObject to run color data synchronization
 
 This mod requires:
 - MoveIt mod
