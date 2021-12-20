@@ -7,20 +7,26 @@ using System.Threading;
 using UnityEngine;
 
 namespace PropPainter {
-    public class PropPainterDataContainer : IDataContainer {
+    public sealed class PropPainterDataContainer : IDataContainer {
         public void AfterDeserialize(DataSerializer s) { }
 
-        public void Deserialize(DataSerializer s) {
+        public unsafe void Deserialize(DataSerializer s) {
             Color[] colors = PPManager.ColorBuffer;
+            Color defColor = new Color(0, 0, 0, 1f / 255f);
             uint len = s.ReadUInt24();
             if (len == colors.Length) {
-                for (int i = 0; i < colors.Length; i++) {
-                    byte a = (byte)s.ReadUInt8();
-                    byte r = (byte)s.ReadUInt8();
-                    byte g = (byte)s.ReadUInt8();
-                    byte b = (byte)s.ReadUInt8();
-                    if (((a << 24) | (r << 16) | (g << 8) | b) != 16777216) {
-                        colors[i] = new Color32(r, g, b, 255);
+                fixed (Color* pColor = &PPManager.ColorBuffer[0]) {
+                    Color* c = pColor;
+                    for (int i = 0; i < colors.Length; i++, c++) {
+                        byte a = (byte)s.ReadUInt8();
+                        byte r = (byte)s.ReadUInt8();
+                        byte g = (byte)s.ReadUInt8();
+                        byte b = (byte)s.ReadUInt8();
+                        if (a != 0x01 && r != 0x00 && g != 0x00 && b != 0x00) {
+                            *c = new Color32(r, g, b, 255);
+                        } else {
+                            *c = defColor;
+                        }
                     }
                 }
             }
@@ -44,7 +50,7 @@ namespace PropPainter {
         }
     }
 
-    public class PPSerializer : ISerializableDataExtension {
+    public sealed class PPSerializer : ISerializableDataExtension {
         private const string PROPPAINTERID = @"PropPainter";
 
         public void OnCreated(ISerializableData serializedData) { }
@@ -56,9 +62,7 @@ namespace PropPainter {
                 SimulationManager smInstance = Singleton<SimulationManager>.instance;
                 if (smInstance.m_serializableDataStorage.TryGetValue(PROPPAINTERID, out byte[] data)) {
                     using (MemoryStream ms = new MemoryStream(data)) {
-                        UnityEngine.Debug.Log("PropPainter: Found Prop Painter data, loading...");
                         var s = DataSerializer.Deserialize<PropPainterDataContainer>(ms, DataSerializer.Mode.Memory, PropPainterLegacyHandler);
-                        UnityEngine.Debug.Log("PropPainter: Loaded " + (data.Length / 1024) + "kb of old Prop Painter data");
                     }
                 }
             }
@@ -74,7 +78,6 @@ namespace PropPainter {
                     data = stream.ToArray();
                 }
                 SaveData(PROPPAINTERID, data);
-                UnityEngine.Debug.Log($"PropPainter: Saved {data.Length} bytes of data");
             } catch (Exception e) {
                 UnityEngine.Debug.LogException(e);
             }
@@ -89,18 +92,5 @@ namespace PropPainter {
                 Monitor.Exit(smInstance.m_serializableDataStorage);
             }
         }
-
-        private void EraseData(string id) {
-            SimulationManager smInstance = Singleton<SimulationManager>.instance;
-            while (!Monitor.TryEnter(smInstance.m_serializableDataStorage, SimulationManager.SYNCHRONIZE_TIMEOUT)) { }
-            try {
-                if (smInstance.m_serializableDataStorage.ContainsKey(id)) {
-                    smInstance.m_serializableDataStorage.Remove(id);
-                }
-            } finally {
-                Monitor.Exit(smInstance.m_serializableDataStorage);
-            }
-        }
-
     }
 }

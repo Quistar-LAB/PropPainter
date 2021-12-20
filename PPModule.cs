@@ -3,10 +3,10 @@ using ColossalFramework.UI;
 using ICities;
 
 namespace PropPainter {
-    public class PPModule : IUserMod, ILoadingExtension {
+    public sealed class PPModule : IUserMod, ILoadingExtension {
         private const string m_modName = @"Prop Painter: Revisited";
         private const string m_modDesc = @"Improved version of Prop Painter with fixes";
-        internal const string m_modVersion = @"1.0";
+        internal const string m_modVersion = @"1.1";
         internal const string m_modFileVersion = m_modVersion + ".*";
 
         public string Name => m_modName + ' ' + m_modVersion;
@@ -14,6 +14,7 @@ namespace PropPainter {
 
         public void OnEnabled() {
             HarmonyHelper.DoOnHarmonyReady(PPPatcher.EnablePatch);
+            PPManager.Initialize();
         }
 
         public void OnDisabled() {
@@ -37,19 +38,15 @@ namespace PropPainter {
         }
 
         public void OnCreated(ILoading loading) {
-
+            PPPatcher.AttachMoveItPostProcess();
         }
 
         public void OnLevelLoaded(LoadMode mode) {
             MoveIt.UIToolOptionPanel.AddMoreButtonCallback += PPManager.AddPropPainterBtn;
         }
 
-        public void OnLevelUnloading() {
+        public void OnLevelUnloading() { }
 
-        }
-
-        public void OnReleased() {
-
-        }
+        public void OnReleased() { }
     }
 }
