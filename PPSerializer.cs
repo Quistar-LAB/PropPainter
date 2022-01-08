@@ -64,6 +64,12 @@ namespace PropPainter {
                     using (MemoryStream ms = new MemoryStream(data)) {
                         var s = DataSerializer.Deserialize<PropPainterDataContainer>(ms, DataSerializer.Mode.Memory, PropPainterLegacyHandler);
                     }
+                } else {
+                    Color[] colors = PPManager.ColorBuffer;
+                    Color defColor = new Color(0, 0, 0, PPManager.FALSEALPHASIG);
+                    for (int i = 0; i < colors.Length; i++) {
+                        colors[i] = defColor;
+                    }
                 }
             }
         }

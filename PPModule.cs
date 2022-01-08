@@ -6,16 +6,13 @@ namespace PropPainter {
     public sealed class PPModule : IUserMod, ILoadingExtension {
         private const string m_modName = @"Prop Painter: Revisited";
         private const string m_modDesc = @"Improved version of Prop Painter with fixes";
-        internal const string m_modVersion = @"1.1";
+        internal const string m_modVersion = @"1.2";
         internal const string m_modFileVersion = m_modVersion + ".*";
 
         public string Name => m_modName + ' ' + m_modVersion;
         public string Description => m_modDesc;
 
-        public void OnEnabled() {
-            HarmonyHelper.DoOnHarmonyReady(PPPatcher.EnablePatch);
-            PPManager.Initialize();
-        }
+        public void OnEnabled() => HarmonyHelper.DoOnHarmonyReady(PPPatcher.EnablePatch);
 
         public void OnDisabled() {
             if (HarmonyHelper.IsHarmonyInstalled) PPPatcher.DisablePatch();
@@ -37,13 +34,9 @@ namespace PropPainter {
                         "(5) Does not create any unnecessary gameobjects, contrary to the old Prop Painter which creates one GameObject to run color data synchronization";
         }
 
-        public void OnCreated(ILoading loading) {
-            PPPatcher.AttachMoveItPostProcess();
-        }
+        public void OnCreated(ILoading loading) => PPPatcher.AttachMoveItPostProcess();
 
-        public void OnLevelLoaded(LoadMode mode) {
-            MoveIt.UIToolOptionPanel.AddMoreButtonCallback += PPManager.AddPropPainterBtn;
-        }
+        public void OnLevelLoaded(LoadMode mode) => PPManager.Initialize();
 
         public void OnLevelUnloading() { }
 
